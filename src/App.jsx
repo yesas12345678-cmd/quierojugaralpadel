@@ -228,13 +228,6 @@ export default function App() {
       <main className="main-content">
         <section className="hero-banner">
           <div style={{ position: 'relative', zIndex: 2 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <span className="stat-pill" style={{ background: 'rgba(204, 255, 0, 0.12)', borderColor: 'var(--border-highlight)', color: 'var(--primary-neon)' }}>
-                <Database size={15} />
-                <span>Base de Datos PostgreSQL Conectada (187.127.233.89:5441)</span>
-              </span>
-            </div>
-
             <h1 className="hero-title">
               Encuentra partidos de <span>pádel sin depender de clubes</span>
             </h1>
