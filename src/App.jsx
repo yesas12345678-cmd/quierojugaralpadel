@@ -5,6 +5,7 @@ import MatchCard from './components/MatchCard';
 import MatchDetailsModal from './components/MatchDetailsModal';
 import CreateMatchModal from './components/CreateMatchModal';
 import UserProfileModal from './components/UserProfileModal';
+import LevelVerificationModal from './components/LevelVerificationModal';
 import { INITIAL_MATCHES } from './data/mockMatches';
 import { PlusCircle, MapPin, Users, Trophy, Sparkles, Database } from 'lucide-react';
 
@@ -21,11 +22,14 @@ export default function App() {
     return {
       id: 'usr-default-' + Math.floor(Math.random() * 1000),
       name: 'Alejandro M.',
-      city: 'Madrid',
+      province: 'Madrid',
+      city: 'Madrid Capital',
       level: 3.5,
       side: 'Revés',
       phone: '+34 612 345 678',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+      isVerified: false,
+      verificationMethod: null
     };
   });
 
@@ -33,6 +37,12 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('padel_user_v1', JSON.stringify(currentUser));
   }, [currentUser]);
+
+  // Modals State
+  const [activeModalMatch, setActiveModalMatch] = useState(null);
+  const [showCreateMatch, setShowCreateMatch] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   // Fetch matches from PostgreSQL API
   const fetchMatches = async () => {
@@ -61,11 +71,6 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedLevel, setSelectedLevel] = useState("Todos");
   const [statusFilter, setStatusFilter] = useState("Todos");
-
-  // Modals State
-  const [activeModalMatch, setActiveModalMatch] = useState(null);
-  const [showCreateMatch, setShowCreateMatch] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
 
   // Filter Logic
   const filteredMatches = useMemo(() => {
@@ -125,7 +130,6 @@ export default function App() {
       });
       if (res.ok) {
         await fetchMatches();
-        // Update modal view if open
         if (activeModalMatch && activeModalMatch.id === matchToJoin.id) {
           const updatedPlayers = [...activeModalMatch.players, currentUser];
           setActiveModalMatch({ ...activeModalMatch, players: updatedPlayers });
@@ -217,6 +221,28 @@ export default function App() {
     }
   };
 
+  const handleSaveVerification = async (verificationData) => {
+    const updatedUser = {
+      ...currentUser,
+      isVerified: true,
+      verificationMethod: verificationData.verificationMethod,
+      level: verificationData.verifiedLevel || currentUser.level,
+      playtomicUrl: verificationData.playtomicUrl || currentUser.playtomicUrl
+    };
+
+    setCurrentUser(updatedUser);
+
+    try {
+      await fetch('/api/users/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser)
+      });
+    } catch (err) {
+      console.error('Error saving verification to DB:', err);
+    }
+  };
+
   return (
     <div className="app-layout">
       <Header
@@ -239,19 +265,19 @@ export default function App() {
             <div className="hero-stats">
               <div className="stat-pill">
                 <MapPin size={16} />
-                <span>Ámbito Nacional (Todas las ciudades)</span>
+                <span>Ámbito Nacional (Todas las provincias)</span>
               </div>
               <div className="stat-pill">
                 <Users size={16} />
-                <span>Buscador por Población o Club</span>
+                <span>Buscador por Provincia o Pueblo/Ciudad</span>
               </div>
               <div className="stat-pill">
                 <Trophy size={16} />
-                <span>Niveles de 1.0 a 7.0</span>
+                <span>Niveles Comprobados de 1.0 a 7.0</span>
               </div>
               <div className="stat-pill" style={{ background: 'rgba(204, 255, 0, 0.1)', borderColor: 'var(--border-highlight)', color: 'var(--primary-neon)' }}>
                 <Sparkles size={16} />
-                <span>Sin intermediarios ni comisiones de club</span>
+                <span>Nivel Verificado por Test & Playtomic</span>
               </div>
             </div>
           </div>
@@ -294,7 +320,7 @@ export default function App() {
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎾</div>
             <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '8px' }}>No se encontraron partidos con los filtros seleccionados</h3>
             <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto 20px' }}>
-              Intenta cambiar la población, ampliar el rango de nivel o sé el primero en organizar un partido en esta zona.
+              Intenta cambiar la provincia, ampliar el rango de nivel o sé el primero en organizar un partido en esta zona.
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
               <button className="btn-secondary" onClick={resetFilters}>
@@ -333,6 +359,15 @@ export default function App() {
           currentUser={currentUser}
           onSaveProfile={handleSaveProfile}
           onClose={() => setShowProfileModal(false)}
+          onOpenVerification={() => setShowVerificationModal(true)}
+        />
+      )}
+
+      {showVerificationModal && (
+        <LevelVerificationModal
+          currentUser={currentUser}
+          onSaveVerification={handleSaveVerification}
+          onClose={() => setShowVerificationModal(false)}
         />
       )}
     </div>

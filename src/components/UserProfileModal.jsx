@@ -11,7 +11,7 @@ const AVATARS = [
   "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80"
 ];
 
-export default function UserProfileModal({ currentUser, onSaveProfile, onClose }) {
+export default function UserProfileModal({ currentUser, onSaveProfile, onClose, onOpenVerification }) {
   const [name, setName] = useState(currentUser?.name || 'Jugador de Pádel');
   const [province, setProvince] = useState(currentUser?.province || 'Madrid');
   const [city, setCity] = useState(currentUser?.city || 'Madrid Capital');
@@ -178,7 +178,14 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
             </div>
 
               <div className="form-group">
-                <label>Nivel de Pádel (1.0 - 7.0) *</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ margin: 0 }}>Nivel de Pádel (1.0 - 7.0) *</label>
+                  {currentUser?.isVerified ? (
+                    <span style={{ fontSize: '0.75rem', color: '#4ade80', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <ShieldCheck size={13} /> Verificado ({currentUser.verificationMethod})
+                    </span>
+                  ) : null}
+                </div>
                 <select value={level} onChange={(e) => setLevel(e.target.value)}>
                   <option value={1.0}>1.0 - Principiante Absoluto / Sin experiencia</option>
                   <option value={1.5}>1.5 - Iniciación Básico / Primeras sensaciones</option>
@@ -194,6 +201,25 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
                   <option value={6.5}>6.5 - Élite / Premier Padel / Ranking pro</option>
                   <option value={7.0}>7.0 - Máximo Nivel Mundial / Top ranking global</option>
                 </select>
+
+                <button
+                  type="button"
+                  onClick={onOpenVerification}
+                  className="btn-secondary"
+                  style={{
+                    width: '100%',
+                    marginTop: '8px',
+                    fontSize: '0.82rem',
+                    padding: '8px',
+                    color: 'var(--primary-neon)',
+                    borderColor: 'var(--border-highlight)',
+                    background: 'rgba(204, 255, 0, 0.06)',
+                    justifyContent: 'center'
+                  }}
+                >
+                  <ShieldCheck size={15} />
+                  <span>{currentUser?.isVerified ? 'Volver a Comprobar Nivel' : 'Comprobar y Verificar mi Nivel de Pádel'}</span>
+                </button>
               </div>
 
             <div className="form-row">
