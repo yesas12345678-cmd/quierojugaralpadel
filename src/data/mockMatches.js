@@ -1,28 +1,64 @@
-export const SPANISH_CITIES = [
-  "Todas las poblaciones",
-  "Madrid",
-  "Barcelona",
-  "Valencia",
-  "Sevilla",
-  "Málaga",
-  "Zaragoza",
+export const SPANISH_PROVINCES = [
+  "Todas las provincias",
+  "Álava",
+  "Albacete",
   "Alicante",
-  "Bilbao",
-  "Murcia",
-  "Palma de Mallorca",
-  "Las Palmas",
+  "Almería",
+  "Asturias",
+  "Ávila",
+  "Badajoz",
+  "Baleares",
+  "Barcelona",
+  "Burgos",
+  "Cáceres",
+  "Cádiz",
+  "Cantabria",
+  "Castellón",
+  "Ciudad Real",
   "Córdoba",
-  "Valladolid",
-  "Vigo",
-  "Gijón",
   "A Coruña",
-  "Granada"
+  "Cuenca",
+  "Girona",
+  "Granada",
+  "Guadalajara",
+  "Gipuzkoa",
+  "Huelva",
+  "Huesca",
+  "Jaén",
+  "León",
+  "Lleida",
+  "Lugo",
+  "Madrid",
+  "Málaga",
+  "Murcia",
+  "Navarra",
+  "Ourense",
+  "Palencia",
+  "Las Palmas",
+  "Pontevedra",
+  "La Rioja",
+  "Salamanca",
+  "Santa Cruz de Tenerife",
+  "Segovia",
+  "Sevilla",
+  "Soria",
+  "Tarragona",
+  "Teruel",
+  "Toledo",
+  "Valencia",
+  "Valladolid",
+  "Bizkaia",
+  "Zamora",
+  "Zaragoza",
+  "Ceuta",
+  "Melilla"
 ];
 
 export const INITIAL_MATCHES = [
   {
     id: "match-101",
-    city: "Madrid",
+    province: "Madrid",
+    city: "Alcobendas",
     locationName: "Padel Club La Moraleja / Pistas Municipales Alcobendas",
     address: "Calle de la Luna 14, Alcobendas (Madrid)",
     courtType: "Cristal - Cubierta",
@@ -36,7 +72,8 @@ export const INITIAL_MATCHES = [
     organizer: {
       id: "usr-1",
       name: "Carlos M.",
-      city: "Madrid",
+      province: "Madrid",
+      city: "Alcobendas",
       level: 4.0,
       side: "Revés",
       avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
@@ -76,7 +113,8 @@ export const INITIAL_MATCHES = [
   },
   {
     id: "match-102",
-    city: "Barcelona",
+    province: "Barcelona",
+    city: "Vall d'Hebron",
     locationName: "CEM Olímpics Vall d'Hebron (Pistas Públicas)",
     address: "Passeig de la Vall d'Hebron 166, Barcelona",
     courtType: "Muro / Exterior",
@@ -90,7 +128,8 @@ export const INITIAL_MATCHES = [
     organizer: {
       id: "usr-4",
       name: "Lucía B.",
-      city: "Barcelona",
+      province: "Barcelona",
+      city: "Barcelona Capital",
       level: 3.0,
       side: "Drive",
       avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"
@@ -119,7 +158,8 @@ export const INITIAL_MATCHES = [
   },
   {
     id: "match-103",
-    city: "Valencia",
+    province: "Valencia",
+    city: "Nazaret",
     locationName: "Pàdel Turia / Polideportivo Municipal Nazaret",
     address: "Carrer de Fernando Moratinos, Valencia",
     courtType: "Cristal - Cubierta",
@@ -133,7 +173,8 @@ export const INITIAL_MATCHES = [
     organizer: {
       id: "usr-6",
       name: "Mateo G.",
-      city: "Valencia",
+      province: "Valencia",
+      city: "Valencia Capital",
       level: 3.5,
       side: "Indiferente",
       avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=200&q=80"
@@ -150,13 +191,12 @@ export const INITIAL_MATCHES = [
     ],
     maxPlayers: 4,
     description: "Organizamos el partido directamente nosotros. La reserva de la pista está hecha para las 18:30.",
-    comments: [
-      { id: "c3", sender: "Mateo G.", text: "Faltan 3 personas. Podéis apuntaros quien queráis independientemente del sexo.", timestamp: "09:00" }
-    ]
+    comments: []
   },
   {
     id: "match-104",
-    city: "Sevilla",
+    province: "Sevilla",
+    city: "Parque Alcosa",
     locationName: "Pista Residencial Parque Alcosa (Independiente)",
     address: "Av. Ciudad de Chivas s/n, Sevilla",
     courtType: "Cristal - Exterior",
@@ -170,7 +210,8 @@ export const INITIAL_MATCHES = [
     organizer: {
       id: "usr-7",
       name: "Gonzalo F.",
-      city: "Sevilla",
+      province: "Sevilla",
+      city: "Sevilla Capital",
       level: 4.5,
       side: "Revés",
       avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80"
@@ -207,7 +248,8 @@ export const INITIAL_MATCHES = [
   },
   {
     id: "match-105",
-    city: "Málaga",
+    province: "Málaga",
+    city: "Teatinos",
     locationName: "Padel Club Teatinos / Complejo Universidad",
     address: "Boulevard Louis Pasteur 30, Málaga",
     courtType: "Cristal - Cubierta",
@@ -221,7 +263,8 @@ export const INITIAL_MATCHES = [
     organizer: {
       id: "usr-10",
       name: "Rocío L.",
-      city: "Málaga",
+      province: "Málaga",
+      city: "Málaga Capital",
       level: 3.6,
       side: "Drive",
       avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=200&q=80"
@@ -250,80 +293,39 @@ export const INITIAL_MATCHES = [
   },
   {
     id: "match-106",
-    city: "Zaragoza",
-    locationName: "Pistas Municipales Actur",
-    address: "Calle Poeta Luciano Gracia 5, Zaragoza",
-    courtType: "Muro - Exterior",
+    province: "Córdoba",
+    city: "Córdoba Capital",
+    locationName: "Pistas Municipales Parque Cruz Conde",
+    address: "Av. del Menéndez Pidal s/n, Córdoba",
+    courtType: "Cristal - Exterior",
     date: "2026-09-11",
-    time: "18:00",
+    time: "19:00",
     durationMinutes: 90,
     category: "Abierto",
-    minLevel: 2.0,
-    maxLevel: 3.0,
-    pricePerPlayer: 3.00,
+    minLevel: 3.0,
+    maxLevel: 4.0,
+    pricePerPlayer: 4.00,
     organizer: {
       id: "usr-12",
-      name: "Jorge A.",
-      city: "Zaragoza",
-      level: 2.5,
+      name: "Manolo H.",
+      province: "Córdoba",
+      city: "Córdoba Capital",
+      level: 3.5,
       side: "Drive",
       avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=200&q=80"
     },
     players: [
       {
         id: "usr-12",
-        name: "Jorge A.",
-        level: 2.5,
+        name: "Manolo H.",
+        level: 3.5,
         side: "Drive",
         avatar: "https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?auto=format&fit=crop&w=200&q=80",
         confirmed: true
       }
     ],
     maxPlayers: 4,
-    description: "Partido de nivel principiante/iniciación para coger soltura en pista.",
-    comments: []
-  },
-  {
-    id: "match-107",
-    city: "Madrid",
-    locationName: "Club Deportivo Canal Isabel II (Chamberí)",
-    address: "Av. de Filipinas 54, Madrid",
-    courtType: "Cristal - Exterior",
-    date: "2026-09-10",
-    time: "20:00",
-    durationMinutes: 90,
-    category: "Mixto",
-    minLevel: 3.2,
-    maxLevel: 4.2,
-    pricePerPlayer: 6.00,
-    organizer: {
-      id: "usr-13",
-      name: "Elena G.",
-      city: "Madrid",
-      level: 3.8,
-      side: "Revés",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-    },
-    players: [
-      {
-        id: "usr-13",
-        name: "Elena G.",
-        level: 3.8,
-        side: "Revés",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
-        confirmed: true
-      },
-      {
-        id: "usr-14",
-        name: "Pablo M.",
-        level: 4.0,
-        side: "Drive",
-        avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80",
-        confirmed: true
-      }
-    ],
-    maxPlayers: 4,
-    description: "Pista reservada en centro de Madrid. Buscamos 2 jugadores para mixto muy divertido.",
+    description: "Partido en Córdoba. Buscamos 3 jugadores nivel 3.0 a 4.0.",
     comments: []
   }
 ];

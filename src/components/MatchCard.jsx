@@ -29,7 +29,7 @@ export default function MatchCard({ match, currentUser, onSelectMatch, onJoinMat
     <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div className="card-header">
         <div>
-          <span className="city-badge">{match.city}</span>
+          <span className="city-badge">{match.province ? `${match.province} • ${match.city}` : match.city}</span>
           <h3 className="card-title">{match.locationName}</h3>
           <div className="card-address">
             <MapPin size={13} />

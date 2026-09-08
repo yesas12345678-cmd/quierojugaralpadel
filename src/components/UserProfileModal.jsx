@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, User, MapPin, Trophy, Phone, Check, Shield, Upload, Camera } from 'lucide-react';
-import { SPANISH_CITIES } from '../data/mockMatches';
+import { SPANISH_PROVINCES } from '../data/mockMatches';
 
 const AVATARS = [
   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
@@ -13,8 +13,8 @@ const AVATARS = [
 
 export default function UserProfileModal({ currentUser, onSaveProfile, onClose }) {
   const [name, setName] = useState(currentUser?.name || 'Jugador de Pádel');
-  const [city, setCity] = useState(currentUser?.city || 'Madrid');
-  const [customCity, setCustomCity] = useState('');
+  const [province, setProvince] = useState(currentUser?.province || 'Madrid');
+  const [city, setCity] = useState(currentUser?.city || 'Madrid Capital');
   const [level, setLevel] = useState(currentUser?.level || 3.5);
   const [side, setSide] = useState(currentUser?.side || 'Indiferente');
   const [phone, setPhone] = useState(currentUser?.phone || '+34 600 000 000');
@@ -39,12 +39,11 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalCity = city === 'OTRA' ? customCity.trim() || 'Madrid' : city;
-
     const updatedUser = {
       id: currentUser?.id || `usr-${Date.now()}`,
       name: name.trim() || 'Jugador Pádel',
-      city: finalCity,
+      province,
+      city: city.trim() || 'Madrid',
       level: Number(level),
       side,
       phone,
@@ -158,27 +157,25 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
 
             <div className="form-row">
               <div className="form-group">
-                <label>Población Habítual *</label>
-                <select value={city} onChange={(e) => setCity(e.target.value)}>
-                  {SPANISH_CITIES.filter(c => c !== "Todas las poblaciones").map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                <label>Provincia *</label>
+                <select value={province} onChange={(e) => setProvince(e.target.value)}>
+                  {SPANISH_PROVINCES.filter(p => p !== "Todas las provincias").map((p) => (
+                    <option key={p} value={p}>{p}</option>
                   ))}
-                  <option value="OTRA">+ Otra población</option>
                 </select>
               </div>
 
-              {city === 'OTRA' && (
-                <div className="form-group">
-                  <label>Tu Población</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. Segovia, Pamplona..."
-                    value={customCity}
-                    onChange={(e) => setCustomCity(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
+              <div className="form-group">
+                <label>Pueblo / Ciudad *</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Alcobendas, Dos Hermanas, Córdoba capital..."
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
               <div className="form-group">
                 <label>Nivel de Pádel (1.0 - 7.0) *</label>
@@ -198,7 +195,6 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
                   <option value={7.0}>7.0 - Máximo Nivel Mundial / Top ranking global</option>
                 </select>
               </div>
-            </div>
 
             <div className="form-row">
               <div className="form-group">

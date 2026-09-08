@@ -17,6 +17,7 @@ export async function initDb() {
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(100) PRIMARY KEY,
         name VARCHAR(150) NOT NULL,
+        province VARCHAR(100) DEFAULT 'Madrid',
         city VARCHAR(100) NOT NULL,
         level NUMERIC(3,1) NOT NULL,
         side VARCHAR(50) DEFAULT 'Indiferente',
@@ -24,12 +25,14 @@ export async function initDb() {
         avatar TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS province VARCHAR(100) DEFAULT 'Madrid';
     `);
 
     // 2. Matches table
     await client.query(`
       CREATE TABLE IF NOT EXISTS matches (
         id VARCHAR(100) PRIMARY KEY,
+        province VARCHAR(100) DEFAULT 'Madrid',
         city VARCHAR(100) NOT NULL,
         location_name VARCHAR(200) NOT NULL,
         address TEXT,
@@ -46,6 +49,7 @@ export async function initDb() {
         organizer_id VARCHAR(100) REFERENCES users(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+      ALTER TABLE matches ADD COLUMN IF NOT EXISTS province VARCHAR(100) DEFAULT 'Madrid';
     `);
 
     // 3. Match Players junction table

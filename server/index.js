@@ -16,14 +16,14 @@ app.get('/api/matches', async (req, res) => {
   try {
     const matchesRes = await pool.query(`
       SELECT 
-        m.id, m.city, m.location_name AS "locationName", m.address, 
+        m.id, m.province, m.city, m.location_name AS "locationName", m.address, 
         m.court_type AS "courtType", m.match_date AS "date", m.match_time AS "time",
         m.duration_minutes AS "durationMinutes", m.category, 
         CAST(m.min_level AS FLOAT) AS "minLevel", 
         CAST(m.max_level AS FLOAT) AS "maxLevel", 
         CAST(m.price_per_player AS FLOAT) AS "pricePerPlayer", 
         m.max_players AS "maxPlayers", m.description, m.organizer_id AS "organizerId",
-        u.name AS "organizerName", u.city AS "organizerCity", 
+        u.name AS "organizerName", u.province AS "organizerProvince", u.city AS "organizerCity", 
         CAST(u.level AS FLOAT) AS "organizerLevel", u.side AS "organizerSide", u.avatar AS "organizerAvatar"
       FROM matches m
       LEFT JOIN users u ON m.organizer_id = u.id
@@ -78,7 +78,7 @@ app.post('/api/matches', async (req, res) => {
   const client = await pool.connect();
   try {
     const {
-      id, city, locationName, address, courtType, date, time, durationMinutes,
+      id, province, city, locationName, address, courtType, date, time, durationMinutes,
       category, minLevel, maxLevel, pricePerPlayer, maxPlayers, description,
       organizer
     } = req.body;
@@ -88,25 +88,26 @@ app.post('/api/matches', async (req, res) => {
     // Ensure organizer exists
     if (organizer) {
       await client.query(`
-        INSERT INTO users (id, name, city, level, side, phone, avatar)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO users (id, name, province, city, level, side, phone, avatar)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (id) DO UPDATE SET
           name = EXCLUDED.name,
+          province = EXCLUDED.province,
           city = EXCLUDED.city,
           level = EXCLUDED.level,
           side = EXCLUDED.side,
           avatar = EXCLUDED.avatar;
-      `, [organizer.id, organizer.name, organizer.city, organizer.level, organizer.side, organizer.phone || null, organizer.avatar]);
+      `, [organizer.id, organizer.name, organizer.province || province || 'Madrid', organizer.city, organizer.level, organizer.side, organizer.phone || null, organizer.avatar]);
     }
 
     // Insert match
     await client.query(`
       INSERT INTO matches (
-        id, city, location_name, address, court_type, match_date, match_time,
+        id, province, city, location_name, address, court_type, match_date, match_time,
         duration_minutes, category, min_level, max_level, price_per_player, max_players, description, organizer_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);
     `, [
-      id, city, locationName, address, courtType, date, time,
+      id, province || 'Madrid', city, locationName, address, courtType, date, time,
       durationMinutes, category, minLevel, maxLevel, pricePerPlayer, maxPlayers || 4, description, organizer.id
     ]);
 
@@ -211,16 +212,17 @@ app.post('/api/users/profile', async (req, res) => {
   const user = req.body;
   try {
     await pool.query(`
-      INSERT INTO users (id, name, city, level, side, phone, avatar)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO users (id, name, province, city, level, side, phone, avatar)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       ON CONFLICT (id) DO UPDATE SET
         name = EXCLUDED.name,
+        province = EXCLUDED.province,
         city = EXCLUDED.city,
         level = EXCLUDED.level,
         side = EXCLUDED.side,
         phone = EXCLUDED.phone,
         avatar = EXCLUDED.avatar;
-    `, [user.id, user.name, user.city, user.level, user.side, user.phone || null, user.avatar]);
+    `, [user.id, user.name, user.province || 'Madrid', user.city, user.level, user.side, user.phone || null, user.avatar]);
 
     res.json({ success: true });
   } catch (err) {

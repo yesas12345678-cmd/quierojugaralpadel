@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { X, PlusCircle, MapPin, Calendar, Clock, Euro, Trophy, ShieldCheck } from 'lucide-react';
-import { SPANISH_CITIES } from '../data/mockMatches';
+import { SPANISH_PROVINCES } from '../data/mockMatches';
 
 export default function CreateMatchModal({ currentUser, onClose, onCreateMatch }) {
-  const [city, setCity] = useState(currentUser?.city || 'Madrid');
-  const [customCity, setCustomCity] = useState('');
+  const [province, setProvince] = useState(currentUser?.province || 'Madrid');
+  const [city, setCity] = useState(currentUser?.city || 'Madrid Capital');
   const [locationName, setLocationName] = useState('');
   const [address, setAddress] = useState('');
   const [courtType, setCourtType] = useState('Cristal - Cubierta');
@@ -19,18 +19,21 @@ export default function CreateMatchModal({ currentUser, onClose, onCreateMatch }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const finalCity = city === 'OTRA' ? customCity.trim() || 'Madrid' : city;
-
     if (!locationName.trim()) {
       alert('Por favor introduce el nombre del club o pista municipal');
+      return;
+    }
+    if (!city.trim()) {
+      alert('Por favor introduce el pueblo o ciudad');
       return;
     }
 
     const newMatch = {
       id: `match-${Date.now()}`,
-      city: finalCity,
+      province,
+      city: city.trim(),
       locationName: locationName.trim(),
-      address: address.trim() || `${locationName}, ${finalCity}`,
+      address: address.trim() || `${locationName}, ${city.trim()} (${province})`,
       courtType,
       date,
       time,
@@ -42,7 +45,8 @@ export default function CreateMatchModal({ currentUser, onClose, onCreateMatch }
       organizer: {
         id: currentUser.id,
         name: currentUser.name,
-        city: currentUser.city,
+        province,
+        city: city.trim(),
         level: currentUser.level,
         side: currentUser.side,
         avatar: currentUser.avatar
@@ -81,7 +85,7 @@ export default function CreateMatchModal({ currentUser, onClose, onCreateMatch }
             <div className="logo-badge" style={{ width: '36px', height: '36px', fontSize: '1.1rem' }}>🎾</div>
             <div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Organizar Partido Independiente</h2>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Publica un partido en cualquier población o pista pública/privada</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Publica un partido en cualquier provincia y pueblo/ciudad</div>
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>
@@ -93,27 +97,25 @@ export default function CreateMatchModal({ currentUser, onClose, onCreateMatch }
           <form onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
-                <label>Población / Ciudad *</label>
-                <select value={city} onChange={(e) => setCity(e.target.value)}>
-                  {SPANISH_CITIES.filter(c => c !== "Todas las poblaciones").map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                <label>Provincia *</label>
+                <select value={province} onChange={(e) => setProvince(e.target.value)}>
+                  {SPANISH_PROVINCES.filter(p => p !== "Todas las provincias").map((p) => (
+                    <option key={p} value={p}>{p}</option>
                   ))}
-                  <option value="OTRA">+ Otra población (Escribir)</option>
                 </select>
               </div>
 
-              {city === 'OTRA' && (
-                <div className="form-group">
-                  <label>Escribe tu Ciudad *</label>
-                  <input
-                    type="text"
-                    placeholder="Ej. Santander, Marbella, Toledo..."
-                    value={customCity}
-                    onChange={(e) => setCustomCity(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
+              <div className="form-group">
+                <label>Pueblo / Ciudad *</label>
+                <input
+                  type="text"
+                  placeholder="Ej. Alcobendas, Dos Hermanas, Córdoba capital..."
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
               <div className="form-group">
                 <label>Nombre del Club o Pista *</label>
@@ -125,7 +127,6 @@ export default function CreateMatchModal({ currentUser, onClose, onCreateMatch }
                   required
                 />
               </div>
-            </div>
 
             <div className="form-group">
               <label>Dirección o Referencia de Ubicación</label>

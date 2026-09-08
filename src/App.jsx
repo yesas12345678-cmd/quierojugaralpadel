@@ -56,7 +56,7 @@ export default function App() {
   }, []);
 
   // Filters State
-  const [selectedCity, setSelectedCity] = useState("Todas las poblaciones");
+  const [selectedProvince, setSelectedProvince] = useState("Todas las provincias");
   const [searchClub, setSearchClub] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Todas");
   const [selectedLevel, setSelectedLevel] = useState("Todos");
@@ -70,7 +70,7 @@ export default function App() {
   // Filter Logic
   const filteredMatches = useMemo(() => {
     return matches.filter((m) => {
-      if (selectedCity !== "Todas las poblaciones" && m.city !== selectedCity) {
+      if (selectedProvince !== "Todas las provincias" && m.province && m.province !== selectedProvince) {
         return false;
       }
       if (searchClub.trim()) {
@@ -78,7 +78,8 @@ export default function App() {
         const locName = (m.locationName || "").toLowerCase();
         const address = (m.address || "").toLowerCase();
         const city = (m.city || "").toLowerCase();
-        if (!locName.includes(query) && !address.includes(query) && !city.includes(query)) {
+        const province = (m.province || "").toLowerCase();
+        if (!locName.includes(query) && !address.includes(query) && !city.includes(query) && !province.includes(query)) {
           return false;
         }
       }
@@ -99,10 +100,10 @@ export default function App() {
 
       return true;
     });
-  }, [matches, selectedCity, searchClub, selectedCategory, selectedLevel, statusFilter, currentUser]);
+  }, [matches, selectedProvince, searchClub, selectedCategory, selectedLevel, statusFilter, currentUser]);
 
   const resetFilters = () => {
-    setSelectedCity("Todas las poblaciones");
+    setSelectedProvince("Todas las provincias");
     setSearchClub("");
     setSelectedCategory("Todas");
     setSelectedLevel("Todos");
@@ -222,7 +223,7 @@ export default function App() {
         currentUser={currentUser}
         onOpenProfile={() => setShowProfileModal(true)}
         onOpenCreateMatch={() => setShowCreateMatch(true)}
-        selectedCity={selectedCity}
+        selectedCity={selectedProvince}
       />
 
       <main className="main-content">
@@ -257,8 +258,8 @@ export default function App() {
         </section>
 
         <Filters
-          selectedCity={selectedCity}
-          setSelectedCity={setSelectedCity}
+          selectedProvince={selectedProvince}
+          setSelectedProvince={setSelectedProvince}
           searchClub={searchClub}
           setSearchClub={setSearchClub}
           selectedCategory={selectedCategory}

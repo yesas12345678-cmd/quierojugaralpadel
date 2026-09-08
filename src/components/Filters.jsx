@@ -1,10 +1,10 @@
 import React from 'react';
 import { Search, MapPin, Filter, Calendar, Users, Trophy } from 'lucide-react';
-import { SPANISH_CITIES } from '../data/mockMatches';
+import { SPANISH_PROVINCES } from '../data/mockMatches';
 
 export default function Filters({
-  selectedCity,
-  setSelectedCity,
+  selectedProvince,
+  setSelectedProvince,
   searchClub,
   setSearchClub,
   selectedCategory,
@@ -33,34 +33,34 @@ export default function Filters({
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
-        {/* City Filter */}
+        {/* Province Filter */}
         <div className="form-group" style={{ margin: 0 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <MapPin size={14} color="#38bdf8" />
-            <span>Población / Ciudad</span>
+            <span>Provincia</span>
           </label>
           <select
-            value={selectedCity}
-            onChange={(e) => setSelectedCity(e.target.value)}
+            value={selectedProvince}
+            onChange={(e) => setSelectedProvince(e.target.value)}
             style={{ width: '100%' }}
           >
-            {SPANISH_CITIES.map((city) => (
-              <option key={city} value={city}>
-                {city}
+            {SPANISH_PROVINCES.map((prov) => (
+              <option key={prov} value={prov}>
+                {prov}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Club or Location Search */}
+        {/* Town / City or Club Search */}
         <div className="form-group" style={{ margin: 0 }}>
           <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Search size={14} color="var(--primary-neon)" />
-            <span>Club o Nombre de Pista</span>
+            <span>Pueblo / Ciudad o Club</span>
           </label>
           <input
             type="text"
-            placeholder="Ej. Alcobendas, Turia, Teatinos..."
+            placeholder="Ej. Alcobendas, Córdoba, Nazaret..."
             value={searchClub}
             onChange={(e) => setSearchClub(e.target.value)}
             style={{ width: '100%' }}
