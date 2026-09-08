@@ -183,13 +183,19 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
               <div className="form-group">
                 <label>Nivel de Pádel (1.0 - 7.0) *</label>
                 <select value={level} onChange={(e) => setLevel(e.target.value)}>
+                  <option value={1.0}>1.0 - Principiante Absoluto / Sin experiencia</option>
+                  <option value={1.5}>1.5 - Iniciación Básico / Primeras sensaciones</option>
                   <option value={2.0}>2.0 - Iniciación / Primeros partidos</option>
-                  <option value={2.5}>2.5 - Principiante / Control básico</option>
-                  <option value={3.0}>3.0 - Medio Bajo / Mantiene peloteo</option>
+                  <option value={2.5}>2.5 - Principiante / Control básico de bola</option>
+                  <option value={3.0}>3.0 - Medio Bajo / Mantiene peloteo regular</option>
                   <option value={3.5}>3.5 - Medio / Domina pared y volea</option>
                   <option value={4.0}>4.0 - Medio Alto / Remate y bandeja sólida</option>
                   <option value={4.5}>4.5 - Avanzado / Ritmo alto y táctica</option>
-                  <option value={5.0}>5.0 - Competición / Torneísta</option>
+                  <option value={5.0}>5.0 - Competición / Torneísta regional</option>
+                  <option value={5.5}>5.5 - Alta Competición / 1ª Categoría</option>
+                  <option value={6.0}>6.0 - Profesional / Circuito nacional</option>
+                  <option value={6.5}>6.5 - Élite / Premier Padel / Ranking pro</option>
+                  <option value={7.0}>7.0 - Máximo Nivel Mundial / Top ranking global</option>
                 </select>
               </div>
             </div>

@@ -98,10 +98,19 @@ export default function Filters({
             style={{ width: '100%' }}
           >
             <option value="Todos">Todos los niveles</option>
+            <option value="1.0">Nivel 1.0 - Principiante Absoluto</option>
+            <option value="1.5">Nivel 1.5 - Iniciación Básico</option>
             <option value="2.0">Nivel 2.0 - Iniciación</option>
-            <option value="3.0">Nivel 3.0 - Medio</option>
+            <option value="2.5">Nivel 2.5 - Principiante</option>
+            <option value="3.0">Nivel 3.0 - Medio Bajo</option>
+            <option value="3.5">Nivel 3.5 - Medio</option>
             <option value="4.0">Nivel 4.0 - Medio Alto</option>
-            <option value="5.0">Nivel 5.0 - Avanzado</option>
+            <option value="4.5">Nivel 4.5 - Avanzado</option>
+            <option value="5.0">Nivel 5.0 - Competición</option>
+            <option value="5.5">Nivel 5.5 - Alta Competición</option>
+            <option value="6.0">Nivel 6.0 - Profesional</option>
+            <option value="6.5">Nivel 6.5 - Élite Pro</option>
+            <option value="7.0">Nivel 7.0 - Máximo Nivel Mundial</option>
           </select>
         </div>
 
