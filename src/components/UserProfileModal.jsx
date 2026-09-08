@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, User, MapPin, Trophy, Phone, Check, Shield } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, User, MapPin, Trophy, Phone, Check, Shield, Upload, Camera } from 'lucide-react';
 import { SPANISH_CITIES } from '../data/mockMatches';
 
 const AVATARS = [
@@ -20,6 +20,23 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
   const [phone, setPhone] = useState(currentUser?.phone || '+34 600 000 000');
   const [avatar, setAvatar] = useState(currentUser?.avatar || AVATARS[0]);
 
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('La imagen debe pesar menos de 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatar(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const finalCity = city === 'OTRA' ? customCity.trim() || 'Madrid' : city;
@@ -37,6 +54,8 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
     onSaveProfile(updatedUser);
     onClose();
   };
+
+  const isCustomPhoto = !AVATARS.includes(avatar);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -56,10 +75,11 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
 
         <div className="modal-body">
           <form onSubmit={handleSubmit}>
-            {/* Avatar Selector */}
-            <div className="form-group" style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <label>Selecciona tu Avatar de Jugador</label>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '10px' }}>
+            {/* Avatar & Photo Upload Selector */}
+            <div className="form-group" style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '10px' }}>Foto de Perfil / Avatar</label>
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 {AVATARS.map((imgUrl, idx) => (
                   <img
                     key={idx}
@@ -73,10 +93,55 @@ export default function UserProfileModal({ currentUser, onSaveProfile, onClose }
                       cursor: 'pointer',
                       borderColor: avatar === imgUrl ? 'var(--primary-neon)' : 'transparent',
                       transform: avatar === imgUrl ? 'scale(1.15)' : 'scale(1)',
-                      boxShadow: avatar === imgUrl ? 'var(--shadow-neon)' : 'none'
+                      boxShadow: avatar === imgUrl ? 'var(--shadow-neon)' : 'none',
+                      transition: 'all 0.2s ease'
                     }}
                   />
                 ))}
+
+                {/* Custom Uploaded Photo Circle */}
+                {isCustomPhoto && (
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      src={avatar}
+                      alt="Foto personalizada"
+                      className="player-avatar"
+                      style={{
+                        width: '46px',
+                        height: '46px',
+                        borderColor: 'var(--primary-neon)',
+                        transform: 'scale(1.15)',
+                        boxShadow: 'var(--shadow-neon)'
+                      }}
+                    />
+                    <span style={{ position: 'absolute', bottom: '-2px', right: '-2px', background: 'var(--primary-neon)', color: '#000', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>✓</span>
+                  </div>
+                )}
+
+                {/* File Upload Button */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                  className="btn-secondary"
+                  style={{
+                    padding: '8px 14px',
+                    fontSize: '0.82rem',
+                    borderRadius: 'var(--radius-full)',
+                    borderColor: 'var(--primary-neon)',
+                    color: 'var(--primary-neon)',
+                    background: 'rgba(204, 255, 0, 0.08)'
+                  }}
+                >
+                  <Camera size={15} />
+                  <span>{isCustomPhoto ? 'Cambiar Foto' : 'Subir tu Foto'}</span>
+                </button>
               </div>
             </div>
 
