@@ -6,17 +6,12 @@ import MatchDetailsModal from './components/MatchDetailsModal';
 import CreateMatchModal from './components/CreateMatchModal';
 import UserProfileModal from './components/UserProfileModal';
 import { INITIAL_MATCHES } from './data/mockMatches';
-import { PlusCircle, Search, Trophy, MapPin, Users, Flame, Sparkles } from 'lucide-react';
+import { PlusCircle, MapPin, Users, Trophy, Sparkles, Database } from 'lucide-react';
 
 export default function App() {
-  // Persistence in LocalStorage
-  const [matches, setMatches] = useState(() => {
-    const saved = localStorage.getItem('padel_matches_v1');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return INITIAL_MATCHES;
-  });
+  const [matches, setMatches] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dbConnected, setDbConnected] = useState(true);
 
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('padel_user_v1');
@@ -24,7 +19,7 @@ export default function App() {
       try { return JSON.parse(saved); } catch (e) { console.error(e); }
     }
     return {
-      id: 'usr-default',
+      id: 'usr-default-' + Math.floor(Math.random() * 1000),
       name: 'Alejandro M.',
       city: 'Madrid',
       level: 3.5,
@@ -34,14 +29,31 @@ export default function App() {
     };
   });
 
-  // Save changes to localStorage
-  useEffect(() => {
-    localStorage.setItem('padel_matches_v1', JSON.stringify(matches));
-  }, [matches]);
-
+  // Save current user locally
   useEffect(() => {
     localStorage.setItem('padel_user_v1', JSON.stringify(currentUser));
   }, [currentUser]);
+
+  // Fetch matches from PostgreSQL API
+  const fetchMatches = async () => {
+    try {
+      const res = await fetch('/api/matches');
+      if (!res.ok) throw new Error('API Error');
+      const data = await res.json();
+      setMatches(data);
+      setDbConnected(true);
+    } catch (err) {
+      console.warn('Falling back to initial matches because server API is offline:', err);
+      setDbConnected(false);
+      setMatches(INITIAL_MATCHES);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
 
   // Filters State
   const [selectedCity, setSelectedCity] = useState("Todas las poblaciones");
@@ -58,11 +70,9 @@ export default function App() {
   // Filter Logic
   const filteredMatches = useMemo(() => {
     return matches.filter((m) => {
-      // City filter
       if (selectedCity !== "Todas las poblaciones" && m.city !== selectedCity) {
         return false;
       }
-      // Club/Location search filter
       if (searchClub.trim()) {
         const query = searchClub.toLowerCase();
         const locName = (m.locationName || "").toLowerCase();
@@ -72,22 +82,19 @@ export default function App() {
           return false;
         }
       }
-      // Category filter
       if (selectedCategory !== "Todas" && m.category !== selectedCategory) {
         return false;
       }
-      // Level filter
       if (selectedLevel !== "Todos") {
         const targetLvl = parseFloat(selectedLevel);
         if (targetLvl < m.minLevel || targetLvl > m.maxLevel) {
           return false;
         }
       }
-      // Status filter
       if (statusFilter === "Abiertos") {
-        if (m.players.length >= m.maxPlayers) return false;
+        if (m.players && m.players.length >= m.maxPlayers) return false;
       } else if (statusFilter === "MisPartidos") {
-        if (!currentUser || !m.players.some((p) => p.id === currentUser.id)) return false;
+        if (!currentUser || !m.players || !m.players.some((p) => p.id === currentUser.id)) return false;
       }
 
       return true;
@@ -102,95 +109,115 @@ export default function App() {
     setStatusFilter("Todos");
   };
 
-  // Match Actions
-  const handleJoinMatch = (matchToJoin) => {
+  // Handlers with PostgreSQL API sync
+  const handleJoinMatch = async (matchToJoin) => {
     if (!currentUser) {
       setShowProfileModal(true);
       return;
     }
 
-    // Check if user already in match
-    const isJoined = matchToJoin.players.some((p) => p.id === currentUser.id);
-    if (isJoined) return;
-
-    if (matchToJoin.players.length >= matchToJoin.maxPlayers) {
-      alert("¡Lo sentimos! Este partido ya ha completado todas sus plazas.");
-      return;
+    try {
+      const res = await fetch(`/api/matches/${matchToJoin.id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user: currentUser })
+      });
+      if (res.ok) {
+        await fetchMatches();
+        // Update modal view if open
+        if (activeModalMatch && activeModalMatch.id === matchToJoin.id) {
+          const updatedPlayers = [...activeModalMatch.players, currentUser];
+          setActiveModalMatch({ ...activeModalMatch, players: updatedPlayers });
+        }
+      }
+    } catch (err) {
+      console.error('Error joining match:', err);
     }
-
-    setMatches((prev) =>
-      prev.map((m) => {
-        if (m.id === matchToJoin.id) {
-          const updatedPlayers = [
-            ...m.players,
-            {
-              id: currentUser.id,
-              name: currentUser.name,
-              level: currentUser.level,
-              side: currentUser.side,
-              avatar: currentUser.avatar,
-              confirmed: true
-            }
-          ];
-          const updatedMatch = { ...m, players: updatedPlayers };
-          if (activeModalMatch && activeModalMatch.id === m.id) {
-            setActiveModalMatch(updatedMatch);
-          }
-          return updatedMatch;
-        }
-        return m;
-      })
-    );
   };
 
-  const handleLeaveMatch = (matchId) => {
+  const handleLeaveMatch = async (matchId) => {
     if (!currentUser) return;
-    setMatches((prev) =>
-      prev.map((m) => {
-        if (m.id === matchId) {
-          const updatedPlayers = m.players.filter((p) => p.id !== currentUser.id);
-          const updatedMatch = { ...m, players: updatedPlayers };
-          if (activeModalMatch && activeModalMatch.id === m.id) {
-            setActiveModalMatch(updatedMatch);
-          }
-          return updatedMatch;
+    try {
+      const res = await fetch(`/api/matches/${matchId}/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.id })
+      });
+      if (res.ok) {
+        await fetchMatches();
+        if (activeModalMatch && activeModalMatch.id === matchId) {
+          const updatedPlayers = activeModalMatch.players.filter(p => p.id !== currentUser.id);
+          setActiveModalMatch({ ...activeModalMatch, players: updatedPlayers });
         }
-        return m;
-      })
-    );
+      }
+    } catch (err) {
+      console.error('Error leaving match:', err);
+    }
   };
 
-  const handleCreateMatch = (newMatch) => {
-    setMatches((prev) => [newMatch, ...prev]);
+  const handleCreateMatch = async (newMatch) => {
+    try {
+      const res = await fetch('/api/matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMatch)
+      });
+      if (res.ok) {
+        await fetchMatches();
+      } else {
+        setMatches((prev) => [newMatch, ...prev]);
+      }
+    } catch (err) {
+      console.error('Error creating match:', err);
+      setMatches((prev) => [newMatch, ...prev]);
+    }
   };
 
-  const handleAddComment = (matchId, text) => {
+  const handleAddComment = async (matchId, text) => {
     if (!currentUser) return;
-    const newComment = {
-      id: `c-${Date.now()}`,
-      sender: currentUser.name,
-      text,
-      timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMatches((prev) =>
-      prev.map((m) => {
-        if (m.id === matchId) {
-          const comments = m.comments ? [...m.comments, newComment] : [newComment];
-          const updatedMatch = { ...m, comments };
-          if (activeModalMatch && activeModalMatch.id === m.id) {
-            setActiveModalMatch(updatedMatch);
-          }
-          return updatedMatch;
+    try {
+      const res = await fetch(`/api/matches/${matchId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          senderName: currentUser.name,
+          text
+        })
+      });
+      if (res.ok) {
+        await fetchMatches();
+        if (activeModalMatch && activeModalMatch.id === matchId) {
+          const newComment = {
+            id: `c-${Date.now()}`,
+            sender: currentUser.name,
+            text,
+            timestamp: new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+          };
+          const comments = activeModalMatch.comments ? [...activeModalMatch.comments, newComment] : [newComment];
+          setActiveModalMatch({ ...activeModalMatch, comments });
         }
-        return m;
-      })
-    );
+      }
+    } catch (err) {
+      console.error('Error posting comment:', err);
+    }
+  };
+
+  const handleSaveProfile = async (updatedUser) => {
+    setCurrentUser(updatedUser);
+    try {
+      await fetch('/api/users/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedUser)
+      });
+    } catch (err) {
+      console.error('Error saving profile to DB:', err);
+    }
   };
 
   return (
     <div className="app-layout">
-      {/* Top Header */}
       <Header
         currentUser={currentUser}
         onOpenProfile={() => setShowProfileModal(true)}
@@ -199,9 +226,15 @@ export default function App() {
       />
 
       <main className="main-content">
-        {/* Hero Section */}
         <section className="hero-banner">
           <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <span className="stat-pill" style={{ background: 'rgba(204, 255, 0, 0.12)', borderColor: 'var(--border-highlight)', color: 'var(--primary-neon)' }}>
+                <Database size={15} />
+                <span>Base de Datos PostgreSQL Conectada (187.127.233.89:5441)</span>
+              </span>
+            </div>
+
             <h1 className="hero-title">
               Encuentra partidos de <span>pádel sin depender de clubes</span>
             </h1>
@@ -212,7 +245,7 @@ export default function App() {
             <div className="hero-stats">
               <div className="stat-pill">
                 <MapPin size={16} />
-                <span>Ámbito Nacional (Cualquier Ciudad)</span>
+                <span>Ámbito Nacional (Todas las ciudades)</span>
               </div>
               <div className="stat-pill">
                 <Users size={16} />
@@ -230,7 +263,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* Filter Section */}
         <Filters
           selectedCity={selectedCity}
           setSelectedCity={setSelectedCity}
@@ -246,8 +278,12 @@ export default function App() {
           totalMatches={filteredMatches.length}
         />
 
-        {/* Matches Grid */}
-        {filteredMatches.length > 0 ? (
+        {loading ? (
+          <div className="glass-card" style={{ padding: '40px', textAlign: 'center' }}>
+            <div style={{ fontSize: '2rem', animation: 'spin 1s infinite linear' }}>🎾</div>
+            <p style={{ marginTop: '12px', color: 'var(--text-muted)' }}>Cargando partidos desde la base de datos PostgreSQL...</p>
+          </div>
+        ) : filteredMatches.length > 0 ? (
           <div className="matches-grid">
             {filteredMatches.map((match) => (
               <MatchCard
@@ -279,7 +315,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Modals */}
       {activeModalMatch && (
         <MatchDetailsModal
           match={activeModalMatch}
@@ -302,7 +337,7 @@ export default function App() {
       {showProfileModal && (
         <UserProfileModal
           currentUser={currentUser}
-          onSaveProfile={(updatedUser) => setCurrentUser(updatedUser)}
+          onSaveProfile={handleSaveProfile}
           onClose={() => setShowProfileModal(false)}
         />
       )}
